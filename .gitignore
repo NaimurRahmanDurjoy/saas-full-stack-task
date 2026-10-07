@@ -1,0 +1,11 @@
+# Root level ignores
+node_modules/
+vendor/
+.env
+.idea/
+.vscode/
+
+ecommerce-saas/backend/vendor/
+ecommerce-saas/frontend/node_modules/
+ecommerce-saas/backend/.env
+ecommerce-saas/frontend/.env
