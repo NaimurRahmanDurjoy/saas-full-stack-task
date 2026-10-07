@@ -4,15 +4,16 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Stores from './pages/Stores';
-import Categories from './pages/Categories';
-import Products from './pages/Products';
-import ProductVariants from './pages/ProductVariants';
-import PackageSelection from './pages/PackageSelection';
-import AdminDashboard from './pages/AdminDashboard';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import AdminLogin from './pages/auth/AdminLogin';
+import Dashboard from './pages/tenant/Dashboard';
+import Stores from './pages/tenant/Stores';
+import Categories from './pages/tenant/Categories';
+import Products from './pages/tenant/Products';
+import ProductVariants from './pages/tenant/ProductVariants';
+import PackageSelection from './pages/tenant/PackageSelection';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import PaymentChannels from './pages/admin/PaymentChannels';
 
 // Phase 10B Proto imports
@@ -20,9 +21,9 @@ import Packages from './pages/admin/Packages';
 import AdminStores from './pages/admin/AdminStores';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSalesReports from './pages/admin/AdminSalesReports';
-import OwnerOrders from './pages/OwnerOrders';
-import OwnerSalesReports from './pages/OwnerSalesReports';
-import Invoice from './pages/Invoice';
+import OwnerOrders from './pages/tenant/OwnerOrders';
+import OwnerSalesReports from './pages/tenant/OwnerSalesReports';
+import Invoice from './pages/tenant/Invoice';
 
 import StorefrontHome from './pages/storefront/StorefrontHome';
 import ProductDetails from './pages/storefront/ProductDetails';
@@ -33,7 +34,17 @@ import OrderSuccess from './pages/storefront/OrderSuccess';
 const GuestRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    if (user.type === 'admin') return <Navigate to="/admin" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user || user.type !== 'admin') return <Navigate to="/admin/login" replace />;
   return children;
 };
 
@@ -49,12 +60,14 @@ function App() {
 
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/payment-channels" element={<ProtectedRoute><PaymentChannels /></ProtectedRoute>} />
-              <Route path="/admin/packages" element={<ProtectedRoute><Packages /></ProtectedRoute>} />
-              <Route path="/admin/stores" element={<ProtectedRoute><AdminStores /></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
-              <Route path="/admin/sales-reports" element={<ProtectedRoute><AdminSalesReports /></ProtectedRoute>} />
+              <Route path="/admin/login" element={<GuestRoute><AdminLogin /></GuestRoute>} />
+
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/admin/payment-channels" element={<AdminRoute><PaymentChannels /></AdminRoute>} />
+              <Route path="/admin/packages" element={<AdminRoute><Packages /></AdminRoute>} />
+              <Route path="/admin/stores" element={<AdminRoute><AdminStores /></AdminRoute>} />
+              <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+              <Route path="/admin/sales-reports" element={<AdminRoute><AdminSalesReports /></AdminRoute>} />
 
               {/* Management Scope */}
               <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />

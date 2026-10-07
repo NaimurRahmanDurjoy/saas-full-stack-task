@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import api from '../services/api';
-import ManagementLayout from '../components/management/ManagementLayout';
+import api from '../../services/api';
+import ManagementLayout from '../../components/management/ManagementLayout';
 
 export default function OwnerOrders() {
     const { storeId } = useParams();

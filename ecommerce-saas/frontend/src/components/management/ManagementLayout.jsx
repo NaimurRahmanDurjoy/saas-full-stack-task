@@ -8,7 +8,7 @@ export default function ManagementLayout({ children, title, description }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const isAdmin = user?.role === 'admin';
+    const isAdmin = user?.type === 'admin';
 
     const adminLinks = [
         { path: '/admin', label: 'Dashboard' },

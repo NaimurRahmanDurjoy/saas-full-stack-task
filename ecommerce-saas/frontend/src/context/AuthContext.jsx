@@ -30,6 +30,12 @@ export const AuthProvider = ({ children }) => {
         await fetchUser();
     };
 
+    const adminLogin = async (credentials) => {
+        await api.get('/sanctum/csrf-cookie');
+        await api.post('/api/admin/login', credentials);
+        await fetchUser();
+    };
+
     const register = async (data) => {
         await api.get('/sanctum/csrf-cookie');
         await api.post('/api/register', data);
@@ -42,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, adminLogin, register, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
