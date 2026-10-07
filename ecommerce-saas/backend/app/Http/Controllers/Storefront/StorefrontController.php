@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Storefront;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Store;
 use App\Models\Category;
@@ -61,7 +63,7 @@ class StorefrontController extends Controller
         }
 
         $products = $query->select(['id', 'category_id', 'name', 'slug', 'description'])
-            ->get();
+            ->paginate(15);
 
         return response()->json($products);
     }

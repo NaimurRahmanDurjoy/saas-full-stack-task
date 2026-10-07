@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Storefront;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Store;
 use App\Services\OrderService;

@@ -22,12 +22,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Users
-        $management = User::create([
+        // Admin User
+        $management = \App\Models\Admin::create([
             'name' => 'Management Admin',
             'email' => 'management@example.com',
             'password' => Hash::make('password'),
-            'role' => 'management',
+            'role' => 'super_admin',
         ]);
 
         $owner = User::create([
