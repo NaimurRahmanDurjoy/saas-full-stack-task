@@ -19,7 +19,7 @@ class Phase10AdminManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->admin = \App\Models\Admin::create(['name' => 'Admin', 'email' => 'admin@admin.com', 'password' => bcrypt('password')]);
         $this->owner = User::factory()->create(['role' => 'customer']);
     }
 

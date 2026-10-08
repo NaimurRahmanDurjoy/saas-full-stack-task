@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('account_number')->nullable();
             $table->string('transaction_id')->nullable()->unique();
             $table->string('status')->default('pending'); // pending, verified, rejected
-            $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('verified_by')->nullable();
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
 

@@ -83,7 +83,7 @@ class SubscriptionTest extends TestCase
 
     public function test_admin_can_verify_subscription_payment()
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = \App\Models\Admin::create(['name' => 'Admin', 'email' => 'admin@admin.com', 'password' => bcrypt('password')]);
         $store = Store::create(['user_id' => User::factory()->create()->id, 'name' => 'Store', 'slug' => 's1']);
         $package = Package::create(['name' => 'Basic', 'slug' => 'basic', 'price' => 50, 'status' => 'active', 'billing_period' => 'monthly']);
         $subscription = Subscription::create(['store_id' => $store->id, 'package_id' => $package->id, 'status' => 'pending']);

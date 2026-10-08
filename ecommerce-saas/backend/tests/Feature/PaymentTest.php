@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Storefront\PaymentController;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\PaymentChannel;

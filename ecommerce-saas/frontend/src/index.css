@@ -1,33 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  /* Linear/Stripe Inspired Light Theme */
   --bg-main: #fcfcfc;
   --bg-secondary: #f3f4f6;
-  
+
   --surface: rgba(255, 255, 255, 0.7);
   --surface-solid: #ffffff;
   --surface-border: rgba(0, 0, 0, 0.06);
   --surface-border-hover: rgba(0, 0, 0, 0.15);
-  
+
   --text-main: #111827;
   --text-muted: #6b7280;
-  
+
   --primary: #111827;
   --primary-hover: #374151;
   --primary-glow: rgba(17, 24, 39, 0.2);
-  
-  --accent: #6366f1; /* Indigo */
+
+  --accent: #6366f1;
   --danger: #ef4444;
-  
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
-  
+
   --input-bg: rgba(255, 255, 255, 0.5);
-  
-  /* Mesh Gradient Backgrounds */
+
   --mesh-1: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
   --mesh-2: radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
   --mesh-3: radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.08) 0px, transparent 50%);
@@ -35,32 +37,31 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Linear/Stripe Inspired Dark Theme */
     --bg-main: #0a0a0a;
     --bg-secondary: #121212;
-    
+
     --surface: rgba(20, 20, 20, 0.6);
     --surface-solid: #171717;
     --surface-border: rgba(255, 255, 255, 0.08);
     --surface-border-hover: rgba(255, 255, 255, 0.2);
-    
+
     --text-main: #f9fafb;
     --text-muted: #9ca3af;
-    
+
     --primary: #f9fafb;
     --primary-hover: #e5e7eb;
     --primary-glow: rgba(255, 255, 255, 0.15);
-    
+
     --accent: #818cf8;
     --danger: #f87171;
-    
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
     --shadow-glow: 0 0 30px rgba(129, 140, 248, 0.2);
-    
+
     --input-bg: rgba(0, 0, 0, 0.3);
-    
+
     --mesh-1: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
     --mesh-2: radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
     --mesh-3: radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.08) 0px, transparent 50%);
@@ -87,14 +88,29 @@ body {
 
 /* Animations */
 @keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 var(--primary-glow); }
-  70% { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
-  100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+  0% {
+    box-shadow: 0 0 0 0 var(--primary-glow);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(0, 0, 0, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
 }
 
 /* Layout */
@@ -127,7 +143,8 @@ body {
 }
 
 /* Linear-style Cards */
-.card, .glass-card {
+.card,
+.glass-card {
   background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -153,16 +170,27 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   margin-top: 0;
   font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--text-main);
 }
 
-h1 { font-size: 2.2rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.1rem; }
+h1 {
+  font-size: 2.2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+}
 
 p {
   color: var(--text-muted);
@@ -188,7 +216,9 @@ p {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.input-field::placeholder { color: transparent; }
+.input-field::placeholder {
+  color: transparent;
+}
 
 .floating-label {
   position: absolute;
@@ -211,8 +241,8 @@ p {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.input-field:focus ~ .floating-label,
-.input-field:not(:placeholder-shown) ~ .floating-label {
+.input-field:focus~.floating-label,
+.input-field:not(:placeholder-shown)~.floating-label {
   top: 0;
   font-size: 0.75rem;
   font-weight: 500;
@@ -221,7 +251,7 @@ p {
   border-radius: 4px;
 }
 
-.input-field:not(:focus):not(:placeholder-shown) ~ .floating-label {
+.input-field:not(:focus):not(:placeholder-shown)~.floating-label {
   color: var(--text-muted);
 }
 
@@ -294,12 +324,7 @@ p {
   border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
-/* Grid Layout */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
+
 
 /* Specific elements */
 .error-text {

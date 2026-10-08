@@ -14,6 +14,7 @@ class Package extends Model
         'slug',
         'description',
         'price',
+        'store_limit',
         'billing_period',
         'status',
     ];

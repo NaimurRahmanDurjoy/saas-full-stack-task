@@ -5,23 +5,23 @@ use Illuminate\Support\Facades\Route;
 
 // Namespaces
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\ManagementAuthController;
 use App\Http\Controllers\Storefront\StorefrontController;
 use App\Http\Controllers\Storefront\CheckoutController;
 use App\Http\Controllers\Storefront\PaymentController;
-use App\Http\Controllers\Tenant\StoreController;
-use App\Http\Controllers\Tenant\CategoryController;
-use App\Http\Controllers\Tenant\ProductController;
-use App\Http\Controllers\Tenant\ProductVariantController;
-use App\Http\Controllers\Tenant\SubscriptionController;
-use App\Http\Controllers\Tenant\PackageController;
-use App\Http\Controllers\Tenant\OrderManagementController;
-use App\Http\Controllers\Tenant\SalesReportController;
-use App\Http\Controllers\Admin\AdminPaymentVerificationController;
-use App\Http\Controllers\Admin\AdminPaymentChannelController;
-use App\Http\Controllers\Admin\AdminPackageController;
-use App\Http\Controllers\Admin\AdminStoreController;
-use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\Admin\StoreController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\OrderManagementController;
+use App\Http\Controllers\Admin\SalesReportController;
+use App\Http\Controllers\Management\ManagementPaymentVerificationController;
+use App\Http\Controllers\Management\ManagementPaymentChannelController;
+use App\Http\Controllers\Management\ManagementPackageController;
+use App\Http\Controllers\Management\ManagementStoreController;
+use App\Http\Middleware\ManagementMiddleware;
 
 // Storefront (Public)
 Route::get('/storefront/{store_slug}', [StorefrontController::class, 'showStore']);
@@ -36,30 +36,30 @@ Route::post('/storefront/{store_slug}/orders/{order_id}/payments', [PaymentContr
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/admin/login', [AdminAuthController::class, 'login']);
+Route::post('/admin/login', [ManagementAuthController::class, 'login']);
 
 // Admin Protected Routes
-Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
-    Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
-    Route::get('/admin/user', [AdminAuthController::class, 'me']);
+Route::middleware(['auth:sanctum', ManagementMiddleware::class])->group(function () {
+    Route::post('/admin/logout', [ManagementAuthController::class, 'logout']);
+    Route::get('/admin/user', [ManagementAuthController::class, 'me']);
     
-    Route::get('/admin/subscription-payments', [AdminPaymentVerificationController::class, 'index']);
-    Route::post('/admin/subscription-payments/{paymentId}/verify', [AdminPaymentVerificationController::class, 'verify']);
+    Route::get('/admin/subscription-payments', [ManagementPaymentVerificationController::class, 'index']);
+    Route::post('/admin/subscription-payments/{paymentId}/verify', [ManagementPaymentVerificationController::class, 'verify']);
 
     // Payment Channel Management
-    Route::get('/admin/payment-channels', [AdminPaymentChannelController::class, 'index']);
-    Route::post('/admin/payment-channels', [AdminPaymentChannelController::class, 'store']);
-    Route::put('/admin/payment-channels/{id}', [AdminPaymentChannelController::class, 'update']);
-    Route::patch('/admin/payment-channels/{id}/status', [AdminPaymentChannelController::class, 'updateStatus']);
-    Route::delete('/admin/payment-channels/{id}', [AdminPaymentChannelController::class, 'destroy']);
+    Route::get('/admin/payment-channels', [ManagementPaymentChannelController::class, 'index']);
+    Route::post('/admin/payment-channels', [ManagementPaymentChannelController::class, 'store']);
+    Route::put('/admin/payment-channels/{id}', [ManagementPaymentChannelController::class, 'update']);
+    Route::patch('/admin/payment-channels/{id}/status', [ManagementPaymentChannelController::class, 'updateStatus']);
+    Route::delete('/admin/payment-channels/{id}', [ManagementPaymentChannelController::class, 'destroy']);
 
     // Packages & Stores
-    Route::apiResource('admin/packages', AdminPackageController::class);
-    Route::patch('/admin/packages/{package}/status', [AdminPackageController::class, 'updateStatus']);
+    Route::apiResource('admin/packages', ManagementPackageController::class);
+    Route::patch('/admin/packages/{package}/status', [ManagementPackageController::class, 'updateStatus']);
     
-    Route::get('/admin/stores', [AdminStoreController::class, 'index']);
-    Route::get('/admin/stores/{store}', [AdminStoreController::class, 'show']);
-    Route::patch('/admin/stores/{store}/status', [AdminStoreController::class, 'updateStatus']);
+    Route::get('/admin/stores', [ManagementStoreController::class, 'index']);
+    Route::get('/admin/stores/{store}', [ManagementStoreController::class, 'show']);
+    Route::patch('/admin/stores/{store}/status', [ManagementStoreController::class, 'updateStatus']);
 
     // Admin Order & Sales Management (Handled currently via OrderManagementController in Tenant folder for code reuse)
     Route::get('/admin/orders', [OrderManagementController::class, 'adminIndex']);

@@ -46,7 +46,7 @@ class CheckoutController extends Controller
 
             $order->load(['orderItems.productVariant.product']);
 
-            $guestToken = \App\Http\Controllers\PaymentController::generateGuestToken($order);
+            $guestToken = \App\Http\Controllers\Storefront\PaymentController::generateGuestToken($order);
             
             return response()->json([
                 'message' => 'Order created successfully',

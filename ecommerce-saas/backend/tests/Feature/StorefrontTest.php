@@ -58,7 +58,7 @@ class StorefrontTest extends TestCase
         // Request Store 1 products, ensure Prod 2 is completely missing natively natively natively intelligently securely.
         $response = $this->getJson("/api/storefront/s1/products");
         $response->assertStatus(200)
-                 ->assertJsonCount(1)
+                 ->assertJsonCount(1, 'data')
                  ->assertJsonFragment(['slug' => 'p1'])
                  ->assertJsonMissing(['slug' => 'p2']);
 
@@ -82,7 +82,7 @@ class StorefrontTest extends TestCase
         // Querying Store 1 with "cat-slug" must NOT return products from Store 2's category which shares the exact same slug natively!
         $response = $this->getJson("/api/storefront/s1/products?category=cat-slug");
         $response->assertStatus(200)
-                 ->assertJsonCount(1)
+                 ->assertJsonCount(1, 'data')
                  ->assertJsonFragment(['slug' => 'p1'])
                  ->assertJsonMissing(['slug' => 'p2']);
     }

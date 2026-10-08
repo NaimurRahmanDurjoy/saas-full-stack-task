@@ -3,40 +3,42 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import AdminLogin from './pages/auth/AdminLogin';
-import Dashboard from './pages/tenant/Dashboard';
-import Stores from './pages/tenant/Stores';
-import Categories from './pages/tenant/Categories';
-import Products from './pages/tenant/Products';
-import ProductVariants from './pages/tenant/ProductVariants';
-import PackageSelection from './pages/tenant/PackageSelection';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import PaymentChannels from './pages/admin/PaymentChannels';
+import ManagementLogin from './pages/auth/ManagementLogin';
+import Dashboard from './pages/admin/Dashboard';
+import Stores from './pages/admin/Stores';
+import Categories from './pages/admin/Categories';
+import Products from './pages/admin/Products';
+import ProductVariants from './pages/admin/ProductVariants';
+import PackageSelection from './pages/admin/PackageSelection';
+import ManagementDashboard from './pages/management/ManagementDashboard';
+import PaymentChannels from './pages/management/PaymentChannels';
 
 // Phase 10B Proto imports
-import Packages from './pages/admin/Packages';
-import AdminStores from './pages/admin/AdminStores';
+import Packages from './pages/management/Packages';
+import ManagementStores from './pages/management/ManagementStores';
+import ManagementOrders from './pages/management/ManagementOrders';
+import ManagementSalesReports from './pages/management/ManagementSalesReports';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSalesReports from './pages/admin/AdminSalesReports';
-import OwnerOrders from './pages/tenant/OwnerOrders';
-import OwnerSalesReports from './pages/tenant/OwnerSalesReports';
-import Invoice from './pages/tenant/Invoice';
+import Invoice from './pages/admin/Invoice';
 
 import StorefrontHome from './pages/storefront/StorefrontHome';
 import ProductDetails from './pages/storefront/ProductDetails';
 import Cart from './pages/storefront/Cart';
 import Checkout from './pages/storefront/Checkout';
 import OrderSuccess from './pages/storefront/OrderSuccess';
+import Landing from './pages/landing/Landing';
 
 const GuestRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) {
-    if (user.type === 'admin') return <Navigate to="/admin" replace />;
-    return <Navigate to="/dashboard" replace />;
+    if (user.type === 'admin') return <Navigate to="/management" replace />;
+    return <Navigate to="/admin" replace />;
   }
   return children;
 };
@@ -44,7 +46,7 @@ const GuestRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (!user || user.type !== 'admin') return <Navigate to="/admin/login" replace />;
+  if (!user || user.type !== 'admin') return <Navigate to="/management/login" replace />;
   return children;
 };
 
@@ -53,30 +55,30 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router>
-          <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+          <div className="min-h-screen font-sans text-gray-900">
             <Routes>
               <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
               <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
 
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-              <Route path="/admin/login" element={<GuestRoute><AdminLogin /></GuestRoute>} />
+              <Route path="/management/login" element={<GuestRoute><ManagementLogin /></GuestRoute>} />
 
-              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/admin/payment-channels" element={<AdminRoute><PaymentChannels /></AdminRoute>} />
-              <Route path="/admin/packages" element={<AdminRoute><Packages /></AdminRoute>} />
-              <Route path="/admin/stores" element={<AdminRoute><AdminStores /></AdminRoute>} />
-              <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-              <Route path="/admin/sales-reports" element={<AdminRoute><AdminSalesReports /></AdminRoute>} />
+              <Route path="/management" element={<AdminRoute><ManagementDashboard /></AdminRoute>} />
+              <Route path="/management/payment-channels" element={<AdminRoute><PaymentChannels /></AdminRoute>} />
+              <Route path="/management/packages" element={<AdminRoute><Packages /></AdminRoute>} />
+              <Route path="/management/stores" element={<AdminRoute><ManagementStores /></AdminRoute>} />
+              <Route path="/management/orders" element={<AdminRoute><ManagementOrders /></AdminRoute>} />
+              <Route path="/management/sales-reports" element={<AdminRoute><ManagementSalesReports /></AdminRoute>} />
 
-              {/* Management Scope */}
-              <Route path="/stores" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
-              <Route path="/stores/:storeId/packages" element={<ProtectedRoute><PackageSelection /></ProtectedRoute>} />
-              <Route path="/stores/:storeId/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-              <Route path="/stores/:storeId/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-              <Route path="/products/:productId/variants" element={<ProtectedRoute><ProductVariants /></ProtectedRoute>} />
-              <Route path="/stores/:storeId/orders" element={<ProtectedRoute><OwnerOrders /></ProtectedRoute>} />
-              <Route path="/stores/:storeId/sales-reports" element={<ProtectedRoute><OwnerSalesReports /></ProtectedRoute>} />
+              {/* Store Owner (Admin Panel) Scope */}
+              <Route path="/admin" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/packages" element={<ProtectedRoute><PackageSelection /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/products/:productId/variants" element={<ProtectedRoute><ProductVariants /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+              <Route path="/admin/:storeId/sales-reports" element={<ProtectedRoute><AdminSalesReports /></ProtectedRoute>} />
               <Route path="/invoices/:orderId" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
 
               {/* Public Customer Scope mapping organically seamlessly natively structurally strictly decoupled natively explicitly! */}
@@ -86,10 +88,17 @@ function App() {
               <Route path="/:storeSlug/checkout" element={<Checkout />} />
               <Route path="/:storeSlug/orders/:orderId/success" element={<OrderSuccess />} />
 
-              {/* Default redirect to dashboard internally */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Public SaaS Landing Page mapped fluently securely efficiently structurally smartly explicitly softly dynamically smartly confidently */}
+              <Route path="/" element={<GuestRoute><Landing /></GuestRoute>} />
             </Routes>
           </div>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              className: 'font-sans text-sm font-medium shadow-xl border border-gray-100 rounded-2xl',
+              duration: 3000,
+            }}
+          />
         </Router>
       </CartProvider>
     </AuthProvider>

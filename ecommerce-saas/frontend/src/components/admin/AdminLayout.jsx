@@ -2,28 +2,37 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Package, Store, CreditCard, ShoppingCart, TrendingUp, Menu, X, LogOut, ChevronRight, User } from 'lucide-react';
+import { LayoutDashboard, Package, Store, ShoppingCart, TrendingUp, Menu, X, LogOut, ChevronRight, User } from 'lucide-react';
 
-export default function ManagementLayout({ children, title, description, headerAction }) {
+export default function AdminLayout({ children, title, description, headerAction }) {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const links = [
-        { path: '/management', label: 'Overview', icon: LayoutDashboard },
-        { path: '/management/packages', label: 'SaaS Packages', icon: Package },
-        { path: '/management/stores', label: 'Tenants & Stores', icon: Store },
-        { path: '/management/payment-channels', label: 'Payment Config', icon: CreditCard },
-        { path: '/management/orders', label: 'Global Orders', icon: ShoppingCart },
-        { path: '/management/sales-reports', label: 'Financial Reports', icon: TrendingUp }
+    // Extract storeId if we are in a store context (e.g. /admin/1/products)
+    const storeMatch = location.pathname.match(/^\/admin\/(\d+)/);
+    const currentStoreId = storeMatch ? storeMatch[1] : null;
+
+    const storeLinks = [
+        { path: '/admin', label: 'Back to Workspaces', icon: LayoutDashboard },
+        { path: `/admin/${currentStoreId}/categories`, label: 'Category Management', icon: Package },
+        { path: `/admin/${currentStoreId}/products`, label: 'Product Management', icon: Store },
+        { path: `/admin/${currentStoreId}/orders`, label: 'Order Management & Invoice', icon: ShoppingCart },
+        { path: `/admin/${currentStoreId}/sales-reports`, label: 'Sales Reports', icon: TrendingUp }
     ];
+
+    const ownerLinks = [
+        { path: '/admin', label: 'My Workspaces', icon: Store },
+    ];
+
+    const links = currentStoreId ? storeLinks : ownerLinks;
 
     return (
         <div className="min-h-screen bg-gray-50 flex font-sans selection:bg-brand-500 selection:text-white">
             {/* Desktop Sidebar */}
             <aside className="hidden lg:flex flex-col w-[280px] fixed inset-y-0 left-0 bg-white border-r border-gray-100 z-30 shadow-sm">
                 <div className="h-20 flex items-center px-8 border-b border-gray-100/60">
-                    <Link to="/management" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2.5">
+                    <Link to="/admin" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-inner">
                             <span className="text-lg">C</span>
                         </div>
@@ -33,11 +42,11 @@ export default function ManagementLayout({ children, title, description, headerA
 
                 <div className="flex-1 overflow-y-auto py-8 px-4 custom-scrollbar">
                     <div className="space-y-1">
-                        <div className="px-4 text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Management</div>
+                        <div className="px-4 text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Admin Panel</div>
                         {links.map(link => {
                             const Icon = link.icon;
                             // Exact match or active sub-route match
-                            const isActive = location.pathname === link.path || (link.path !== '/management' && location.pathname.startsWith(link.path + '/'));
+                            const isActive = location.pathname === link.path || (link.path !== '/admin' && location.pathname.startsWith(link.path + '/'));
                             
                             return (
                                 <Link
@@ -71,7 +80,7 @@ export default function ManagementLayout({ children, title, description, headerA
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-bold text-gray-900 text-sm truncate">{user?.name}</h4>
-                            <p className="text-xs text-gray-500 font-medium truncate capitalize">Management</p>
+                            <p className="text-xs text-gray-500 font-medium truncate capitalize">Admin Panel</p>
                         </div>
                     </div>
                 </div>
@@ -91,7 +100,7 @@ export default function ManagementLayout({ children, title, description, headerA
                             className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-100 z-50 flex flex-col shadow-2xl lg:hidden"
                         >
                             <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100/60 shrink-0">
-                                <Link to="/management" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2">
+                                <Link to="/admin" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center">C</div>
                                     Cartessa
                                 </Link>
@@ -101,10 +110,10 @@ export default function ManagementLayout({ children, title, description, headerA
                             </div>
 
                             <div className="flex-1 overflow-y-auto px-4 py-8 space-y-2 custom-scrollbar">
-                                <div className="px-4 text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Management</div>
+                                <div className="px-4 text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Admin Panel</div>
                                 {links.map(link => {
                                     const Icon = link.icon;
-                                    const isActive = location.pathname === link.path || (link.path !== '/management' && location.pathname.startsWith(link.path + '/'));
+                                    const isActive = location.pathname === link.path || (link.path !== '/admin' && location.pathname.startsWith(link.path + '/'));
                                     return (
                                         <Link
                                             onClick={() => setIsMobileMenuOpen(false)}
@@ -136,7 +145,7 @@ export default function ManagementLayout({ children, title, description, headerA
                         <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-400">
                             <span>Cartessa</span>
                             <ChevronRight className="w-4 h-4" />
-                            <span className="text-gray-900 font-bold capitalize">Management</span>
+                            <span className="text-gray-900 font-bold capitalize">Admin</span>
                         </div>
                     </div>
 

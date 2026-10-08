@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
+import { ShieldCheck, ArrowLeft, CreditCard, Lock, Package, ArrowRight } from 'lucide-react';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 const Checkout = () => {
     const { storeSlug } = useParams();
@@ -24,6 +27,8 @@ const Checkout = () => {
         setLoading(true);
         setError(null);
 
+        const checkoutToast = toast.loading('Processing your secure order...', { className: 'font-medium' });
+
         try {
             const items = cart.map(item => ({
                 variant_id: item.variant.id,
@@ -33,16 +38,19 @@ const Checkout = () => {
             const payload = { ...form, items };
             const response = await api.post(`/api/storefront/${storeSlug}/checkout`, payload);
 
+            toast.success('Order placed successfully!', { id: checkoutToast });
             clearCart();
+
             navigate(`/${storeSlug}/orders/${response.data.order.id}/success`, {
                 state: {
                     order: response.data.order,
                     guestToken: response.data.guest_token
                 }
             });
-
         } catch (err) {
-            setError(err.response?.data?.message || 'Error processing checkout.');
+            const errMsg = err.response?.data?.message || 'Error processing checkout.';
+            setError(errMsg);
+            toast.error(errMsg, { id: checkoutToast });
         } finally {
             setLoading(false);
         }
@@ -50,126 +58,173 @@ const Checkout = () => {
 
     if (cart.length === 0) {
         return (
-            <div className="container" style={{ textAlign: 'center', marginTop: '60px' }}>
-                <div className="card" style={{ padding: '60px' }}>
-                    <h2 style={{ fontSize: '2rem', marginBottom: '24px' }}>Your cart is empty</h2>
-                    <Link to={`/${storeSlug}`} className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>Return to Store</Link>
-                </div>
+            <div className="min-h-screen bg-gray-50 font-sans flex items-center justify-center p-6">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-sm max-w-lg w-full">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Package className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Cart is empty</h2>
+                    <p className="text-gray-500 mb-8 max-w-sm mx-auto">You have no items to checkout. Proceed back to the store to add items.</p>
+                    <Link to={`/${storeSlug}`} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-brand-600 text-white font-bold hover:bg-brand-700 transition">
+                        Return to Store
+                    </Link>
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div className="container" style={{ maxWidth: '1100px' }}>
-            <header className="dashboard-header" style={{ marginBottom: '40px', borderBottom: 'none', paddingBottom: 0 }}>
-                <Link to={`/${storeSlug}/cart`} className="link-text" style={{ fontSize: '1rem', textDecoration: 'none' }}>← Back to Cart</Link>
-            </header>
-
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '40px' }}>Secure Checkout</h1>
-
-            {error && <div className="error-text">{error}</div>}
-
-            <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                <form onSubmit={handleSubmit} className="card" style={{ flex: '1 1 500px', padding: '40px' }}>
-                    <h2 style={{ margin: '0 0 32px 0', fontSize: '1.5rem', borderBottom: '1px solid var(--surface-border)', paddingBottom: '16px' }}>Shipping Information</h2>
-                    
-                    <div className="form-group">
-                        <input 
-                            required 
-                            className="input-field"
-                            placeholder=" "
-                            value={form.customer_name} 
-                            onChange={e => setForm({ ...form, customer_name: e.target.value })} 
-                        />
-                        <label className="floating-label">Full Name *</label>
-                    </div>
-
-                    <div className="form-group">
-                        <input 
-                            required 
-                            type="email"
-                            className="input-field"
-                            placeholder=" "
-                            value={form.customer_email} 
-                            onChange={e => setForm({ ...form, customer_email: e.target.value })} 
-                        />
-                        <label className="floating-label">Email Address *</label>
-                    </div>
-
-                    <div className="form-group">
-                        <input 
-                            className="input-field"
-                            type="tel"
-                            placeholder=" "
-                            value={form.customer_phone} 
-                            onChange={e => setForm({ ...form, customer_phone: e.target.value })} 
-                        />
-                        <label className="floating-label">Phone Number (Optional)</label>
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: '32px' }}>
-                        <textarea 
-                            required 
-                            className="input-field"
-                            placeholder=" "
-                            value={form.shipping_address} 
-                            onChange={e => setForm({ ...form, shipping_address: e.target.value })} 
-                            rows="4" 
-                            style={{ resize: 'vertical' }}
-                        />
-                        <label className="floating-label">Shipping Address *</label>
-                    </div>
-
-                    <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '18px', fontSize: '1.2rem', width: '100%' }}>
-                        {loading ? 'Processing Order...' : 'Place Order Now'}
-                    </button>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '16px', textAlign: 'center' }}>
-                        🔒 256-bit encrypted secure transaction. Prices will be verified live.
-                    </p>
-                </form>
-
-                <div className="card" style={{ flex: '0 1 400px', padding: '32px', position: 'sticky', top: '24px', backgroundColor: 'var(--bg-main)' }}>
-                    <h3 style={{ margin: '0 0 24px 0', fontSize: '1.3rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Summary</h3>
-                    
-                    <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {cart.map(item => (
-                            <div key={item.variant.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--input-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                                        {item.variant.image_url ? (
-                                            <img src={item.variant.image_url} alt="Variant" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Img</span>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '0.95rem' }}>{item.product.name}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Qty: {item.quantity} × ${item.variant.price}</div>
-                                    </div>
-                                </div>
-                                <div style={{ fontWeight: '700' }}>
-                                    ${(item.variant.price * item.quantity).toFixed(2)}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    
-                    <div style={{ borderTop: '2px solid var(--surface-border)', paddingTop: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '12px', fontSize: '0.95rem' }}>
-                            <span>Subtotal</span>
-                            <span>${cartTotal.toFixed(2)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.95rem' }}>
-                            <span>Shipping</span>
-                            <span>Calculated at next step</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '1.5rem', color: 'var(--text-main)' }}>
-                            <span>Total</span>
-                            <span>${cartTotal.toFixed(2)}</span>
-                        </div>
+        <div className="min-h-screen bg-white font-sans selection:bg-brand-500 selection:text-white pb-24">
+            {/* Header */}
+            <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
+                <div className="px-6 py-4 mx-auto max-w-7xl flex items-center justify-between">
+                    <Link to={`/${storeSlug}/cart`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
+                        <ArrowLeft className="w-4 h-4" /> Back to Cart
+                    </Link>
+                    <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-1.5 rounded-full text-sm">
+                        <Lock className="w-4 h-4" /> Secure Checkout
                     </div>
                 </div>
-            </div>
+            </header>
+
+            <main className="max-w-6xl mx-auto px-6 py-12">
+                {error && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 font-medium text-sm flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                            <ShieldCheck className="w-4 h-4 text-red-600" />
+                        </div>
+                        {error}
+                    </motion.div>
+                )}
+
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+                    {/* Checkout Form */}
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex-1">
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-8">
+                            Shipping Details
+                        </h1>
+
+                        <form id="checkoutForm" onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Full Name *</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                        placeholder="Jane Doe"
+                                        value={form.customer_name}
+                                        onChange={e => setForm({ ...form, customer_name: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Email Address *</label>
+                                    <input
+                                        required
+                                        type="email"
+                                        className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                        placeholder="jane@example.com"
+                                        value={form.customer_email}
+                                        onChange={e => setForm({ ...form, customer_email: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                    placeholder="+1 (555) 000-0000"
+                                    value={form.customer_phone}
+                                    onChange={e => setForm({ ...form, customer_phone: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Shipping Address *</label>
+                                <textarea
+                                    required
+                                    className="w-full bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl p-5 font-semibold text-gray-900 outline-none transition-all shadow-sm resize-none"
+                                    placeholder="123 Example St, City, State 12345, Country"
+                                    value={form.shipping_address}
+                                    onChange={e => setForm({ ...form, shipping_address: e.target.value })}
+                                    rows="4"
+                                />
+                            </div>
+                        </form>
+                    </motion.div>
+
+                    {/* Order Summary */}
+                    <motion.aside initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="lg:w-[420px] shrink-0">
+                        <div className="bg-gray-50/50 rounded-[2rem] border border-gray-100 p-8 sticky top-28 shadow-sm">
+                            <h3 className="font-extrabold text-lg text-gray-900 mb-6">Order Summary</h3>
+
+                            <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                {cart.map(item => (
+                                    <div key={item.variant.id} className="flex gap-4 items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-50 p-1">
+                                            {item.variant.image_url ? (
+                                                <img src={item.variant.image_url} alt="Variant" className="w-full h-full object-contain mix-blend-multiply" />
+                                            ) : (
+                                                <Package className="w-5 h-5 text-gray-300" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-gray-900 text-sm truncate">{item.product.name}</h4>
+                                            <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity}</p>
+                                        </div>
+                                        <div className="font-extrabold text-sm text-gray-900">
+                                            ${(item.variant.price * item.quantity).toFixed(2)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="space-y-3 mb-8">
+                                <div className="flex justify-between items-center text-gray-500 font-medium text-sm">
+                                    <span>Subtotal</span>
+                                    <span>${cartTotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-gray-500 font-medium text-sm">
+                                    <span>Shipping</span>
+                                    <span className="text-green-600 font-bold bg-green-50 px-2 rounded">FREE</span>
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-gray-200/60 w-full mb-6" />
+
+                            <div className="flex justify-between items-end mb-8">
+                                <span className="font-extrabold text-gray-900 text-lg">Total Due</span>
+                                <span className="font-black text-3xl text-gray-900 tracking-tight">${cartTotal.toFixed(2)}</span>
+                            </div>
+
+                            <button
+                                form="checkoutForm"
+                                type="submit"
+                                disabled={loading}
+                                className={`w-full flex items-center justify-center gap-2 h-14 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[0.98] ${loading ? 'bg-gray-200 text-gray-400 cursor-wait' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-brand-500/25 cursor-pointer'
+                                    }`}
+                            >
+                                {loading ? (
+                                    <>Processing...</>
+                                ) : (
+                                    <>
+                                        <CreditCard className="w-5 h-5" /> Confirm & Pay
+                                    </>
+                                )}
+                            </button>
+
+                            <div className="mt-6 flex flex-col gap-3">
+                                <div className="flex items-center gap-2 justify-center text-xs font-semibold text-gray-500">
+                                    <Lock className="w-3.5 h-3.5 text-gray-400" />
+                                    256-bit encrypted secure transaction
+                                </div>
+                            </div>
+                        </div>
+                    </motion.aside>
+                </div>
+            </main>
         </div>
     );
 };
