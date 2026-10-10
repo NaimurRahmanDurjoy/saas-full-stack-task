@@ -106,7 +106,7 @@ const ManagementDashboard = () => {
                                             {payment.payment_channel?.name}
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="font-black text-gray-900 text-lg">${payment.amount}</div>
+                                            <div className="font-black text-gray-900 text-lg">৳{payment.amount}</div>
                                         </td>
                                         <td className="px-6 py-5 font-mono text-xs text-brand-600 bg-brand-50 p-2 rounded-lg inline-block mt-3">
                                             {payment.transaction_id}

@@ -82,6 +82,15 @@ body {
   letter-spacing: -0.01em;
 }
 
+@media print {
+  body {
+    display: block !important;
+    min-height: auto !important;
+    background: white !important;
+    color: black !important;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

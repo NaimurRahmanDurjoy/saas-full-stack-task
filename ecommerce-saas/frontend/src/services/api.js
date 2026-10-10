@@ -18,5 +18,18 @@ api.interceptors.request.use(config => {
     }
     return config;
 });
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 402) {
+            // Subscription expired or not active
+            if (window.location.pathname.startsWith('/admin/')) {
+                // To avoid multiple toasts if concurrent requests fail, we can just redirect
+                window.location.href = '/admin?error=subscription_required';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default api;

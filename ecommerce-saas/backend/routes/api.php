@@ -24,14 +24,17 @@ use App\Http\Controllers\Management\ManagementStoreController;
 use App\Http\Middleware\ManagementMiddleware;
 
 // Storefront (Public)
-Route::get('/storefront/{store_slug}', [StorefrontController::class, 'showStore']);
-Route::get('/storefront/{store_slug}/categories', [StorefrontController::class, 'categories']);
-Route::get('/storefront/{store_slug}/products', [StorefrontController::class, 'products']);
-Route::get('/storefront/{store_slug}/products/{product_slug}', [StorefrontController::class, 'productDetails']);
+Route::middleware(['check.subscription'])->group(function () {
+    Route::get('/storefront/{store_slug}', [StorefrontController::class, 'showStore']);
+    Route::get('/storefront/{store_slug}/categories', [StorefrontController::class, 'categories']);
+    Route::get('/storefront/{store_slug}/products', [StorefrontController::class, 'products']);
+    Route::get('/storefront/{store_slug}/products/{product_slug}', [StorefrontController::class, 'productDetails']);
 
-Route::post('/storefront/{store_slug}/checkout', [CheckoutController::class, 'process']);
-Route::get('/storefront/{store_slug}/payment-channels', [PaymentController::class, 'channels']);
-Route::post('/storefront/{store_slug}/orders/{order_id}/payments', [PaymentController::class, 'submitPayment']);
+    Route::post('/storefront/{store_slug}/checkout', [CheckoutController::class, 'process']);
+    Route::post('/storefront/{store_slug}/track-order', [StorefrontController::class, 'trackOrder']);
+    Route::get('/storefront/{store_slug}/payment-channels', [PaymentController::class, 'channels']);
+    Route::post('/storefront/{store_slug}/orders/{order_id}/payments', [PaymentController::class, 'submitPayment']);
+});
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
@@ -61,29 +64,37 @@ Route::middleware(['auth:sanctum', ManagementMiddleware::class])->group(function
     Route::get('/admin/stores/{store}', [ManagementStoreController::class, 'show']);
     Route::patch('/admin/stores/{store}/status', [ManagementStoreController::class, 'updateStatus']);
 
+    // Merchants
+    Route::get('/admin/merchants', [App\Http\Controllers\Management\ManagementMerchantController::class, 'index']);
+
     // Admin Order & Sales Management (Handled currently via OrderManagementController in Tenant folder for code reuse)
     Route::get('/admin/orders', [OrderManagementController::class, 'adminIndex']);
     Route::get('/admin/orders/{order}', [OrderManagementController::class, 'adminShow']);
     Route::get('/admin/sales-report', [SalesReportController::class, 'adminReport']);
 });
 
+// Public Packages Route
+Route::get('/packages', [PackageController::class, 'index']);
+
 // Tenant Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     
-    Route::get('/packages', [PackageController::class, 'index']);
-    
-    Route::post('/stores/{storeId}/subscriptions', [SubscriptionController::class, 'create']);
+    Route::post('/stores/{store}/subscriptions', [SubscriptionController::class, 'create']);
     Route::post('/subscriptions/{subscriptionId}/payments', [SubscriptionController::class, 'submitPayment']);
     
     Route::apiResource('stores', StoreController::class);
-    Route::apiResource('stores.categories', CategoryController::class);
-    Route::apiResource('stores.products', ProductController::class);
-    Route::apiResource('products.variants', ProductVariantController::class);
+    Route::middleware('check.subscription')->group(function () {
+        Route::apiResource('stores.categories', CategoryController::class);
+        Route::apiResource('stores.products', ProductController::class);
+        Route::apiResource('products.variants', ProductVariantController::class);
 
-    // Owner Order & Sales Management
-    Route::get('/stores/{storeId}/orders', [OrderManagementController::class, 'ownerIndex']);
-    Route::get('/stores/{storeId}/orders/{orderId}', [OrderManagementController::class, 'ownerShow']);
-    Route::get('/stores/{storeId}/sales-report', [SalesReportController::class, 'ownerReport']);
+        // Owner Order & Sales Management
+        Route::get('/stores/{store}/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'getDashboardData']);
+        Route::get('/stores/{store}/orders', [OrderManagementController::class, 'ownerIndex']);
+        Route::get('/stores/{store}/orders/{order}', [OrderManagementController::class, 'ownerShow']);
+        Route::patch('/stores/{store}/orders/{order}/status', [OrderManagementController::class, 'ownerUpdateStatus']);
+        Route::get('/stores/{store}/sales-report', [SalesReportController::class, 'ownerReport']);
+    });
 });

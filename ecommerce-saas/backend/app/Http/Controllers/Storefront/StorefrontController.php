@@ -50,7 +50,14 @@ class StorefrontController extends Controller
 
         $query = Product::where('store_id', $store->id)
             ->where('status', 'active')
-            ->with(['category:id,name,slug']); // Minimal category structure
+            ->with([
+                'category:id,name,slug',
+                'productVariants' => function ($q) use ($store) {
+                    $q->where('store_id', $store->id)
+                       ->where('status', 'active')
+                       ->select(['id', 'product_id', 'sku', 'price', 'image_url', 'stock']);
+                }
+            ]); // Minimal category structure
 
         if ($request->has('category')) {
             $catSlug = $request->input('category');
@@ -88,5 +95,34 @@ class StorefrontController extends Controller
             ->firstOrFail();
 
         return response()->json($product);
+    }
+    public function trackOrder(Request $request, $store_slug)
+    {
+        $store = $this->getActiveStore($store_slug);
+
+        $request->validate([
+            'order_id' => 'nullable',
+            'contact' => 'required'
+        ]);
+
+        $query = \App\Models\Order::where('store_id', $store->id)
+            ->where(function ($q) use ($request) {
+                $q->where('customer_email', $request->contact)
+                  ->orWhere('customer_phone', $request->contact);
+            });
+
+        if ($request->filled('order_id')) {
+            $query->where('id', $request->order_id);
+        }
+
+        $orders = $query->with(['orderItems.productVariant.product', 'payments.paymentChannel'])
+                        ->latest()
+                        ->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json(['message' => 'No orders found for the given contact information.'], 404);
+        }
+
+        return response()->json(['orders' => $orders]);
     }
 }

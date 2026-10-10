@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class SubscriptionController extends Controller
 {
-    public function create(Request $request, $storeId)
+    public function create(Request $request, Store $store)
     {
-        $store = Store::where('id', $storeId)->where('user_id', auth()->id())->firstOrFail();
+        if ($store->user_id !== auth()->id()) abort(403);
 
         if (Subscription::where('store_id', $store->id)->whereIn('status', ['active', 'pending'])->exists()) {
             throw ValidationException::withMessages(['store' => 'This store already has an active or pending subscription.']);

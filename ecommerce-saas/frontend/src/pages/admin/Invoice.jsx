@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import './Invoice.css';
 
 export default function Invoice() {
-    const { orderId } = useParams();
+    const { storeId, orderId } = useParams();
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,22 +14,16 @@ export default function Invoice() {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                // Determine if fetching from Admin or Owner route.
-                // Since this generalizes across roles visually, we handle a simpler isolated fetch
-                // OR we just use Admin fetch and expect 403 fallback. 
-                // We will try admin scope.
-                const res = await api.get(`/api/admin/orders/${orderId}`);
+                const res = await api.get(`/api/stores/${storeId}/orders/${orderId}`);
                 setOrder(res.data);
             } catch (err) {
-                // Fallback to try store owner fetch if admin fails?
-                // This is a naive attempt without heavy context tracking
                 setError('Failed to fetch invoice. Ensure you have the right permissions.');
             } finally {
                 setLoading(false);
             }
         };
         fetchOrder();
-    }, [orderId]);
+    }, [storeId, orderId]);
 
     const handlePrint = () => {
         window.print();
@@ -38,7 +33,7 @@ export default function Invoice() {
     if (error) return <div style={{ padding: '40px', color: 'red' }}>{error}</div>;
     if (!order) return <div style={{ padding: '40px' }}>Order not found.</div>;
 
-    const subtotal = order.orderItems?.reduce((acc, item) => acc + (parseFloat(item.price) * item.quantity), 0) || 0;
+    const subtotal = order.order_items?.reduce((acc, item) => acc + (parseFloat(item.unit_price) * item.quantity), 0) || 0;
 
     return (
         <div className="invoice-layout">
@@ -55,8 +50,8 @@ export default function Invoice() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                         <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#334155' }}>Tenant Store</h2>
-                        <p style={{ margin: 0, color: '#64748b' }}>{order.store?.name}</p>
-                        <p style={{ margin: 0, color: '#64748b' }}>{order.store?.slug}</p>
+                        {/* We don't have store details in ownerShow, it only returns order. But we can omit or rely on what's available */}
+                        <p style={{ margin: 0, color: '#64748b' }}>Store ID: {order.store_id}</p>
                     </div>
                 </div>
 
@@ -87,15 +82,17 @@ export default function Invoice() {
                         </tr>
                     </thead>
                     <tbody>
-                        {order.orderItems?.map(item => (
+                        {order.order_items?.map(item => (
                             <tr key={item.id}>
                                 <td>
-                                    <strong>{item.variant?.product?.name}</strong><br />
-                                    <span style={{ fontSize: '0.875rem', color: '#64748b' }}>{item.variant?.size} / {item.variant?.color} (SKU: {item.variant?.sku})</span>
+                                    <strong>{item.product_variant?.product?.name}</strong><br />
+                                    <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                                        SKU: {item.product_variant?.sku}
+                                    </span>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                                <td style={{ textAlign: 'right' }}>${item.price}</td>
-                                <td style={{ textAlign: 'right' }}>${(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
+                                <td style={{ textAlign: 'right' }}>৳{item.unit_price}</td>
+                                <td style={{ textAlign: 'right' }}>৳{(parseFloat(item.unit_price) * item.quantity).toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -105,11 +102,11 @@ export default function Invoice() {
                     <div style={{ width: '300px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e2e8f0' }}>
                             <span style={{ color: '#64748b' }}>Subtotal</span>
-                            <span style={{ fontWeight: 500 }}>${subtotal.toFixed(2)}</span>
+                            <span style={{ fontWeight: 500 }}>৳{subtotal.toFixed(2)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: '2px solid #0f172a', fontSize: '1.25rem', fontWeight: 700 }}>
                             <span>Total</span>
-                            <span>${parseFloat(order.total_amount).toFixed(2)}</span>
+                            <span>৳{parseFloat(order.total_amount).toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

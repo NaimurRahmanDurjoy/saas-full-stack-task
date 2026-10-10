@@ -11,7 +11,7 @@ export default function Packages() {
 
     const [showModal, setShowModal] = useState(false);
     const [editingPkg, setEditingPkg] = useState(null);
-    const [formData, setFormData] = useState({ name: '', description: '', price: '', store_limit: '', status: 'active' });
+    const [formData, setFormData] = useState({ name: '', description: '', price: '', billing_period: 'monthly', status: 'active' });
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
@@ -83,7 +83,7 @@ export default function Packages() {
                 <button
                     onClick={() => {
                         setEditingPkg(null);
-                        setFormData({ name: '', description: '', price: '', store_limit: '', status: 'active' });
+                        setFormData({ name: '', description: '', price: '', billing_period: 'monthly', status: 'active' });
                         setShowModal(true);
                     }}
                     className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition shadow-lg shadow-brand-500/25 active:scale-95"
@@ -124,8 +124,8 @@ export default function Packages() {
                             )}
 
                             <div className="flex items-end gap-1 mb-8 shrink-0">
-                                <span className="text-4xl font-black text-gray-900">${pkg.price}</span>
-                                <span className="text-sm font-medium text-gray-400 mb-1">/month</span>
+                                <span className="text-4xl font-black text-gray-900">৳{pkg.price}</span>
+                                <span className="text-sm font-medium text-gray-400 mb-1">/{pkg.billing_period?.replace('_', ' ')}</span>
                             </div>
 
                             <div className="space-y-4 mb-8 flex-grow">
@@ -133,7 +133,7 @@ export default function Packages() {
                                     <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center shrink-0">
                                         ✓
                                     </div>
-                                    {pkg.store_limit ? `${pkg.store_limit} Store Limit` : 'Unlimited Stores'}
+                                    Full Store Access
                                 </div>
                                 <div className="flex items-center gap-3 text-sm font-semibold text-gray-600">
                                     <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ export default function Packages() {
                                 <button
                                     onClick={() => {
                                         setEditingPkg(pkg);
-                                        setFormData({ name: pkg.name, description: pkg.description || '', price: pkg.price, store_limit: pkg.store_limit || '', status: pkg.status });
+                                        setFormData({ name: pkg.name, description: pkg.description || '', price: pkg.price, billing_period: pkg.billing_period || 'monthly', status: pkg.status });
                                         setShowModal(true);
                                     }}
                                     className="flex items-center justify-center gap-2 h-10 rounded-xl bg-gray-50 font-bold text-gray-600 text-xs hover:bg-gray-100 hover:text-brand-600 transition"
@@ -220,7 +220,7 @@ export default function Packages() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Monthly Price ($)</label>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Monthly Price (৳)</label>
                                     <input
                                         required
                                         type="number" step="0.01"
@@ -231,14 +231,17 @@ export default function Packages() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Store Limit</label>
-                                    <input
-                                        type="number"
-                                        className="w-full h-12 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-xl px-4 font-semibold text-gray-900 outline-none transition"
-                                        placeholder="Leave blank for unlimited"
-                                        value={formData.store_limit}
-                                        onChange={e => setFormData({ ...formData, store_limit: e.target.value })}
-                                    />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Billing Period</label>
+                                    <select
+                                        className="w-full h-12 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-xl px-4 font-semibold text-gray-900 outline-none transition appearance-none"
+                                        value={formData.billing_period}
+                                        onChange={e => setFormData({ ...formData, billing_period: e.target.value })}
+                                    >
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly (3 Months)</option>
+                                        <option value="half_yearly">Half-Yearly (6 Months)</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Status</label>

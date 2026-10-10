@@ -20,7 +20,7 @@ class ManagementPackageController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'store_limit' => 'nullable|integer|min:1',
+            'billing_period' => 'required|in:monthly,quarterly,half_yearly,yearly',
             'status' => 'required|in:active,inactive'
         ]);
         
@@ -41,7 +41,7 @@ class ManagementPackageController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'store_limit' => 'nullable|integer|min:1',
+            'billing_period' => 'required|in:monthly,quarterly,half_yearly,yearly',
             'status' => 'required|in:active,inactive'
         ]);
 

@@ -9,12 +9,13 @@ export default function AdminLayout({ children, title, description, headerAction
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Extract storeId if we are in a store context (e.g. /admin/1/products)
-    const storeMatch = location.pathname.match(/^\/admin\/(\d+)/);
+    // Extract storeId/storeSlug if we are in a store context (e.g. /admin/awesome-store/products)
+    const storeMatch = location.pathname.match(/^\/admin\/([a-zA-Z0-9-]+)/);
     const currentStoreId = storeMatch ? storeMatch[1] : null;
 
     const storeLinks = [
-        { path: '/admin', label: 'Back to Workspaces', icon: LayoutDashboard },
+        { path: '/admin', label: 'Back to Stores', icon: LayoutDashboard },
+        { path: `/admin/${currentStoreId}/dashboard`, label: 'Store Dashboard', icon: LayoutDashboard },
         { path: `/admin/${currentStoreId}/categories`, label: 'Category Management', icon: Package },
         { path: `/admin/${currentStoreId}/products`, label: 'Product Management', icon: Store },
         { path: `/admin/${currentStoreId}/orders`, label: 'Order Management & Invoice', icon: ShoppingCart },
@@ -22,15 +23,15 @@ export default function AdminLayout({ children, title, description, headerAction
     ];
 
     const ownerLinks = [
-        { path: '/admin', label: 'My Workspaces', icon: Store },
+        { path: '/admin', label: 'My Stores', icon: Store },
     ];
 
     const links = currentStoreId ? storeLinks : ownerLinks;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex font-sans selection:bg-brand-500 selection:text-white">
+        <div className="min-h-screen bg-gray-50 flex font-sans selection:bg-brand-500 selection:text-white print:block print:bg-white print:min-h-0">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex flex-col w-[280px] fixed inset-y-0 left-0 bg-white border-r border-gray-100 z-30 shadow-sm">
+            <aside className="hidden lg:flex flex-col w-[280px] fixed inset-y-0 left-0 bg-white border-r border-gray-100 z-30 shadow-sm print:hidden">
                 <div className="h-20 flex items-center px-8 border-b border-gray-100/60">
                     <Link to="/admin" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-inner">
@@ -93,11 +94,11 @@ export default function AdminLayout({ children, title, description, headerAction
                         <motion.div 
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 lg:hidden"
+                            className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden"
                         />
                         <motion.aside 
                             initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                            className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-100 z-50 flex flex-col shadow-2xl lg:hidden"
+                            className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-100 z-50 flex flex-col shadow-2xl lg:hidden print:hidden"
                         >
                             <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100/60 shrink-0">
                                 <Link to="/admin" className="text-2xl font-black tracking-tighter text-gray-900 flex items-center gap-2">
@@ -135,8 +136,8 @@ export default function AdminLayout({ children, title, description, headerAction
             </AnimatePresence>
 
             {/* Main Content Area */}
-            <div className="flex-1 lg:pl-[280px] flex flex-col min-h-screen">
-                <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100/60 sticky top-0 z-20 flex items-center justify-between px-6 lg:px-10">
+            <div className="flex-1 lg:pl-[280px] flex flex-col min-h-screen print:pl-0 print:block print:min-h-0">
+                <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100/60 sticky top-0 z-20 flex items-center justify-between px-6 lg:px-10 print:hidden">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 bg-white shadow-sm hover:bg-gray-50 transition">
                             <Menu className="w-5 h-5" />
@@ -157,8 +158,8 @@ export default function AdminLayout({ children, title, description, headerAction
                     </div>
                 </header>
 
-                <main className="flex-1 p-6 lg:p-10 max-w-[1600px] mx-auto w-full">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <main className="flex-1 p-6 lg:p-10 max-w-[1600px] mx-auto w-full print:block print:p-0 print:m-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 print:hidden">
                         <div>
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">{title}</h1>
                             {description && <p className="text-gray-500 mt-2 font-medium">{description}</p>}
@@ -174,6 +175,7 @@ export default function AdminLayout({ children, title, description, headerAction
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
+                        className="print:!opacity-100 print:!transform-none print:!block"
                     >
                         {children}
                     </motion.div>

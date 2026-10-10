@@ -26,11 +26,16 @@ const Register = () => {
     return (
         <div className="auth-wrapper">
             <div className="glass-card">
-                <h1>Create Account</h1>
-                <p className="subtitle">Join us and start building</p>
-                
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--surface-solid)', border: '1px solid var(--surface-border)', marginBottom: '12px', boxShadow: 'var(--shadow-sm)' }}>
+                        <span style={{ fontSize: '20px' }}>🚀</span>
+                    </div>
+                    <h2 style={{ fontSize: '1.75rem', marginBottom: '4px' }}>Create Account</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Join us and start building</p>
+                </div>
+
                 {error && <div className="error-text">{error}</div>}
-                
+
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <input
@@ -65,7 +70,7 @@ const Register = () => {
                         />
                         <label className="floating-label">Password</label>
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: '24px' }}>
                         <input
                             className="input-field"
                             type="password"
@@ -76,12 +81,12 @@ const Register = () => {
                         />
                         <label className="floating-label">Confirm Password</label>
                     </div>
-                    <button type="submit" className="btn-primary" disabled={loading}>
+                    <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '14px 16px' }}>
                         {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
                 </form>
 
-                <div className="auth-footer">
+                <div className="auth-footer" style={{ marginTop: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     Already have an account? <Link to="/login" className="link-text">Sign in</Link>
                 </div>
             </div>

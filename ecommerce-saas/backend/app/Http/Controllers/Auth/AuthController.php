@@ -23,7 +23,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'customer', // default role
+            'role' => 'store_owner', // default role for SaaS registration
         ]);
 
         Auth::login($user);

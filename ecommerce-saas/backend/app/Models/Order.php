@@ -21,6 +21,18 @@ class Order extends Model
         'status',
     ];
 
+    protected $appends = ['payment_status'];
+
+    public function getPaymentStatusAttribute()
+    {
+        $payment = $this->payments()->latest()->first();
+        if (!$payment) {
+            return 'unpaid';
+        }
+        
+        return $payment->status === 'verified' ? 'paid' : $payment->status;
+    }
+
     public function store()
     {
         return $this->belongsTo(Store::class);

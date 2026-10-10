@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Package, Store, CreditCard, ShoppingCart, TrendingUp, Menu, X, LogOut, ChevronRight, User } from 'lucide-react';
+import { LayoutDashboard, Package, Store, CreditCard, ShoppingCart, TrendingUp, Menu, X, LogOut, ChevronRight, User, Users } from 'lucide-react';
 
 export default function ManagementLayout({ children, title, description, headerAction }) {
     const { user, logout } = useAuth();
@@ -12,6 +12,7 @@ export default function ManagementLayout({ children, title, description, headerA
     const links = [
         { path: '/management', label: 'Overview', icon: LayoutDashboard },
         { path: '/management/packages', label: 'SaaS Packages', icon: Package },
+        { path: '/management/merchants', label: 'Merchant Management', icon: Users },
         { path: '/management/stores', label: 'Tenants & Stores', icon: Store },
         { path: '/management/payment-channels', label: 'Payment Config', icon: CreditCard },
         { path: '/management/orders', label: 'Global Orders', icon: ShoppingCart },

@@ -13,7 +13,7 @@ class StoreController extends Controller
     public function index(Request $request)
     {
         // Only queries stores accessible to the authenticated user.
-        $stores = Store::where('user_id', $request->user()->id)->get();
+        $stores = Store::with(['subscriptions.subscriptionPayments', 'subscriptions.package'])->where('user_id', $request->user()->id)->get();
         return response()->json($stores);
     }
 
@@ -44,6 +44,7 @@ class StoreController extends Controller
     public function show(Store $store)
     {
         Gate::authorize('view', $store);
+        $store->load(['subscriptions.package']);
         return response()->json($store);
     }
 

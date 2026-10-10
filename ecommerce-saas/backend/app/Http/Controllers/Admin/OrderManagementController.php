@@ -23,17 +23,32 @@ class OrderManagementController extends Controller
     }
 
     // STORE OWNER Scopes
-    public function ownerIndex($storeId)
+    public function ownerIndex(Store $store)
     {
-        $store = Store::where('id', $storeId)->where('user_id', Auth::id())->firstOrFail();
-        return response()->json(Order::where('store_id', $store->id)->with(['orderItems.productVariant.product'])->latest()->get());
+        if ($store->user_id !== Auth::id()) abort(403);
+        return response()->json(Order::where('store_id', $store->id)->with(['orderItems.productVariant.product', 'payments.paymentChannel'])->latest()->get());
     }
 
-    public function ownerShow($storeId, $orderId)
+    public function ownerShow(Store $store, Order $order)
     {
-        $store = Store::where('id', $storeId)->where('user_id', Auth::id())->firstOrFail();
-        $order = Order::where('id', $orderId)->where('store_id', $store->id)->firstOrFail();
-        
+        if ($store->user_id !== Auth::id() || $order->store_id !== $store->id) abort(403);
         return response()->json($order->load(['orderItems.productVariant.product', 'payments.paymentChannel']));
+    }
+    public function ownerUpdateStatus(Request $request, Store $store, Order $order)
+    {
+        if ($store->user_id !== Auth::id() || $order->store_id !== $store->id) abort(403);
+        
+        $request->validate([
+            'status' => 'required|in:pending,processing,completed,cancelled'
+        ]);
+
+        $order->update(['status' => $request->status]);
+
+        // Also update payment status if completed (optional, but good practice)
+        if ($request->status === 'completed') {
+            $order->payments()->update(['status' => 'verified']);
+        }
+
+        return response()->json(['message' => 'Order status updated successfully', 'order' => $order]);
     }
 }

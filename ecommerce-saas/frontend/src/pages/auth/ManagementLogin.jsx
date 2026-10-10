@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 const ManagementLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { ManagementLogin } = useAuth();
+    const { adminLogin } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ const ManagementLogin = () => {
         setError('');
         setLoading(true);
         try {
-            await ManagementLogin({ email, password });
+            await adminLogin({ email, password });
             navigate('/admin');
         } catch (err) {
             setError('Invalid admin credentials. Please try again.');

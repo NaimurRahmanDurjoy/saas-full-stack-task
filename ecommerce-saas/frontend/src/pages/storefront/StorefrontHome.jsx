@@ -1,225 +1,243 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useOutletContext, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, Filter, ArrowRight, Store, Star } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Sparkles, Zap, TrendingUp, Star } from 'lucide-react';
 import api from '../../services/api';
 import { useCart } from '../../context/CartContext';
 
 const StorefrontHome = () => {
     const { storeSlug } = useParams();
-    const { cart } = useCart();
-    const [store, setStore] = useState(null);
-    const [categories, setCategories] = useState([]);
+    const { store, categories, setIsCartOpen } = useOutletContext();
+    const { addToCart } = useCart();
+    const location = useLocation();
+    
     const [products, setProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [error, setError] = useState('');
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 20);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        const queryParams = new URLSearchParams(location.search);
+        const search = queryParams.get('search');
+        const category = queryParams.get('category');
+        
+        setSearchQuery(search || '');
+        setSelectedCategory(category || '');
+    }, [location]);
 
     useEffect(() => {
-        api.get(`/api/storefront/${storeSlug}`)
-            .then(res => setStore(res.data))
-            .catch(() => setError('Store not found.'));
-
-        api.get(`/api/storefront/${storeSlug}/categories`)
-            .then(res => setCategories(res.data))
-            .catch(console.error);
-    }, [storeSlug]);
-
-    useEffect(() => {
-        const url = selectedCategory
-            ? `/api/storefront/${storeSlug}/products?category=${selectedCategory}`
-            : `/api/storefront/${storeSlug}/products`;
+        setLoading(true);
+        let url = `/api/storefront/${storeSlug}/products?`;
+        if (selectedCategory) url += `category=${selectedCategory}&`;
+        if (searchQuery) url += `search=${searchQuery}`;
 
         api.get(url)
             .then(res => {
                 const productList = res.data.data ? res.data.data : res.data;
-                setProducts(productList);
+                const filtered = searchQuery 
+                    ? productList.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    : productList;
+                setProducts(filtered);
             })
-            .catch(console.error);
-    }, [storeSlug, selectedCategory]);
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [storeSlug, selectedCategory, searchQuery]);
 
-    if (error) return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
-                <Store className="w-24 h-24 mx-auto mb-6 text-gray-300" />
-                <h1 className="text-6xl font-extrabold text-gray-900 mb-2">404</h1>
-                <p className="text-xl text-gray-500">{error}</p>
-                <Link to="/" className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-brand-600 text-white rounded-full font-medium hover:bg-brand-700 transition">
-                    Return Home
-                </Link>
-            </motion.div>
-        </div>
-    );
-
-    if (!store) return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
-        </div>
-    );
-
-    const totalCartItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-    const staggerContainer = {
-        animate: { transition: { staggerChildren: 0.05 } }
+    const handleAddToCart = (e, product) => {
+        e.preventDefault();
+        const defaultVariant = product.product_variants?.[0];
+        if (defaultVariant) {
+            addToCart(defaultVariant, product, 1);
+            setIsCartOpen(true); // Open slide-out cart drawer
+        }
     };
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 }
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans selection:bg-brand-500 selection:text-white pb-24">
-            {/* Sticky Navigation */}
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-3' : 'bg-transparent py-5'}`}>
-                <div className="px-6 mx-auto max-w-7xl flex items-center justify-between">
-                    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 text-white flex items-center justify-center shadow-lg">
-                            <Store className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900 leading-tight">{store.name}</h1>
-                            {isScrolled && <p className="text-xs text-gray-500">{store.description?.substring(0, 40)}...</p>}
-                        </div>
-                    </motion.div>
+        <div className="px-4 sm:px-6 lg:px-8">
+            {/* Stunning Hero Section - Premium Light variant */}
+            {!selectedCategory && !searchQuery && (
+                <div className="relative mb-20 rounded-[2rem] sm:rounded-[3rem] bg-white border border-gray-100 overflow-hidden min-h-[500px] flex items-center justify-center p-8 sm:p-16 isolate shadow-xl shadow-gray-200/40">
+                    {/* Background Gradients */}
+                    <div className="absolute top-0 -left-1/4 w-full h-full bg-gradient-to-br from-emerald-100/60 to-transparent blur-[120px] -z-10 mix-blend-multiply" />
+                    <div className="absolute bottom-0 -right-1/4 w-full h-full bg-gradient-to-tl from-teal-100/60 to-transparent blur-[120px] -z-10 mix-blend-multiply" />
+                    
+                    {/* Floating Orbs */}
+                    <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/4 w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-200 to-teal-200 blur-2xl opacity-40 -z-10" />
+                    <motion.div animate={{ y: [0, 30, 0], rotate: [0, -10, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-1/4 right-1/4 w-32 h-32 rounded-full bg-gradient-to-tr from-teal-200 to-emerald-200 blur-2xl opacity-40 -z-10" />
 
-                    <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex items-center gap-4">
-                        <Link to={`/${storeSlug}/cart`} className="relative flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 text-gray-700 hover:text-brand-600 hover:border-brand-200 hover:shadow-md transition-all group">
-                            <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
-                            <AnimatePresence>
-                                {totalCartItems > 0 && (
-                                    <motion.span
-                                        initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                                        className="absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center bg-brand-500 text-white text-[10px] font-bold rounded-full border-2 border-white shadow-sm"
-                                    >
-                                        {totalCartItems}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </Link>
-                    </motion.div>
+                    <div className="text-center max-w-4xl mx-auto z-10 flex flex-col items-center">
+                        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-md border border-gray-200/50 text-emerald-700 text-sm font-bold tracking-wide mb-8 shadow-sm">
+                            <Sparkles className="w-4 h-4 text-emerald-500" /> Introducing the new collection
+                        </motion.div>
+                        
+                        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tighter leading-[1.1] mb-6">
+                            Experience <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
+                                True Excellence.
+                            </span>
+                        </motion.h1>
+                        
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+                            {store?.description || 'Discover a curated selection of premium products designed to elevate your everyday life. Shop the trend.'}
+                        </motion.p>
+                        
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center gap-4">
+                            <button onClick={() => window.scrollTo({top: 600, behavior: 'smooth'})} className="px-8 py-4 rounded-full bg-gray-900 text-white font-black text-lg hover:bg-emerald-600 hover:shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all duration-300 flex items-center gap-2">
+                                Start Shopping <ArrowRight className="w-5 h-5" />
+                            </button>
+                        </motion.div>
+                    </div>
                 </div>
-            </header>
+            )}
 
-            {/* Storefront Hero */}
-            <div className="relative pt-32 pb-16 px-6 mx-auto max-w-7xl">
-                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-center max-w-3xl mx-auto mb-16">
-                    <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-                        Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-600">{store.name}</span>
-                    </h2>
-                    <p className="text-lg text-gray-500">{store.description}</p>
-                </motion.div>
-
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Category Sidebar */}
-                    <aside className="lg:w-64 shrink-0">
-                        <div className="sticky top-28 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-50 text-gray-900">
-                                <Filter className="w-4 h-4" />
-                                <h3 className="font-semibold uppercase tracking-wider text-xs">Categories</h3>
-                            </div>
-                            <ul className="space-y-1.5">
-                                <li>
-                                    <button
-                                        onClick={() => setSelectedCategory('')}
-                                        className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-brand-50 text-brand-600' : 'text-gray-600 hover:bg-gray-50'}`}
-                                    >
-                                        All Products
-                                    </button>
-                                </li>
-                                {categories.map(cat => (
-                                    <li key={cat.id}>
-                                        <button
-                                            onClick={() => setSelectedCategory(cat.slug)}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedCategory === cat.slug ? 'bg-brand-50 text-brand-600' : 'text-gray-600 hover:bg-gray-50'}`}
-                                        >
-                                            {cat.name}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </aside>
-
-                    {/* Product Grid */}
-                    <main className="flex-1">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={selectedCategory}
-                                variants={staggerContainer}
-                                initial="initial"
-                                animate="animate"
-                                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-                            >
-                                {products.map(product => {
-                                    const defaultVariant = product.product_variants?.[0];
-                                    return (
-                                        <motion.div variants={fadeInUp} key={product.id}>
-                                            <Link
-                                                to={`/${storeSlug}/products/${product.slug}`}
-                                                className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-200 transition-all duration-300 flex flex-col h-full block"
-                                            >
-                                                <div className="aspect-[4/3] bg-gray-50 relative overflow-hidden flex items-center justify-center p-6">
-                                                    {defaultVariant?.image_url ? (
-                                                        <img
-                                                            src={defaultVariant.image_url}
-                                                            alt={product.name}
-                                                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
-                                                        />
-                                                    ) : (
-                                                        <div className="text-gray-300 flex flex-col items-center">
-                                                            <ShoppingBag className="w-12 h-12 mb-2 opacity-50" />
-                                                            <span className="text-sm font-medium">No Image</span>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Hover Overlay elements - minimal */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                </div>
-
-                                                <div className="p-6 flex flex-col flex-1">
-                                                    <div className="text-xs font-semibold text-brand-600 uppercase tracking-wilder mb-2">
-                                                        {product.category?.name || 'Uncategorized'}
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-gray-900 mb-4 line-clamp-2 leading-tight group-hover:text-brand-600 transition-colors">
-                                                        {product.name}
-                                                    </h3>
-
-                                                    <div className="mt-auto flex items-end justify-between">
-                                                        <div>
-                                                            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider block mb-1">Price</span>
-                                                            <span className="text-xl font-extrabold text-gray-900">
-                                                                {defaultVariant ? `$${Number(defaultVariant.price).toFixed(2)}` : 'Unavailable'}
-                                                            </span>
-                                                        </div>
-                                                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900 group-hover:bg-brand-500 group-hover:text-white transition-colors">
-                                                            <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </motion.div>
-                                    );
-                                })}
-                            </motion.div>
-                        </AnimatePresence>
-
-                        {products.length === 0 && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-3xl border border-dashed border-gray-200">
-                                <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">No Products Found</h3>
-                                <p className="text-gray-500 text-center max-w-sm">We couldn't find any products in this category. Check back later or browse other categories.</p>
-                            </motion.div>
-                        )}
-                    </main>
-                </div>
+            {/* Top Categories Pills */}
+            <div className="mb-12 flex items-center justify-center sm:justify-start gap-3 overflow-x-auto pb-4 hide-scrollbar">
+                <Link 
+                    to={`/${storeSlug}`}
+                    className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-black transition-all duration-300 ${!selectedCategory && !searchQuery ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 border border-gray-200'}`}
+                >
+                    All Items
+                </Link>
+                {categories.map(cat => (
+                    <Link 
+                        key={cat.id}
+                        to={`/${storeSlug}?category=${cat.slug}`}
+                        className={`shrink-0 px-6 py-2.5 rounded-full text-sm font-black transition-all duration-300 ${selectedCategory === cat.slug ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 border border-gray-200'}`}
+                    >
+                        {cat.name}
+                    </Link>
+                ))}
             </div>
+
+            {/* Title */}
+            <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    {searchQuery ? `Results for "${searchQuery}"` : selectedCategory ? categories.find(c => c.slug === selectedCategory)?.name : (
+                        <><TrendingUp className="w-8 h-8 text-emerald-500" /> Trending Now</>
+                    )}
+                </h3>
+                <span className="text-sm font-bold text-gray-500 bg-gray-100 border border-gray-200 px-3 py-1 rounded-full">{products.length} Products</span>
+            </div>
+
+            {/* Product Grid - Premium glass cards */}
+            {loading ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+                    {[...Array(10)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-3xl p-3 border border-gray-100 flex flex-col h-full animate-pulse">
+                            <div className="aspect-[4/5] bg-gray-100 rounded-2xl mb-4 w-full" />
+                            <div className="px-1 flex-1 flex flex-col">
+                                <div className="h-3 w-1/3 bg-gray-100 rounded-full mb-3" />
+                                <div className="h-4 w-3/4 bg-gray-200 rounded-full mb-2" />
+                                <div className="h-4 w-1/2 bg-gray-200 rounded-full mb-4" />
+                                <div className="mt-auto pt-3 flex items-center justify-between">
+                                    <div className="h-6 w-16 bg-gray-200 rounded-full" />
+                                    <div className="w-8 h-8 rounded-full bg-gray-100" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={selectedCategory + searchQuery}
+                        variants={container}
+                        initial="hidden"
+                        animate="show"
+                        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8"
+                    >
+                        {products.map(product => {
+                            const defaultVariant = product.product_variants?.[0];
+                            const price = defaultVariant ? Number(defaultVariant.price) : 0;
+                            
+                            // Fake Trust Rating between 4.5 and 5.0
+                            const rating = (4.5 + Math.random() * 0.5).toFixed(1);
+                            const reviews = Math.floor(Math.random() * 150) + 12;
+
+                            return (
+                                <motion.div variants={item} key={product.id}>
+                                    <Link to={`/${storeSlug}/products/${product.slug}`} className="group block relative bg-white rounded-3xl p-3 hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 border border-gray-100 hover:border-emerald-200 flex flex-col h-full">
+                                        {/* Image Container - Soft rounded */}
+                                        <div className="relative aspect-[4/5] bg-gray-50/80 rounded-2xl mb-4 overflow-hidden">
+                                            {defaultVariant?.image_url ? (
+                                                <img 
+                                                    src={defaultVariant.image_url} 
+                                                    alt={product.name}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition-transform duration-700 ease-out"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                                    <Zap className="w-10 h-10 mb-2 opacity-30" />
+                                                </div>
+                                            )}
+                                            
+                                            {/* Hover Overlay Button */}
+                                            <div className="absolute inset-0 bg-gray-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end justify-center p-4">
+                                                <button 
+                                                    onClick={(e) => handleAddToCart(e, product)}
+                                                    className="w-full bg-white/95 backdrop-blur-md text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-xl hover:bg-emerald-600 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-300"
+                                                >
+                                                    <ShoppingCart className="w-4 h-4" /> Add to Cart
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Product Info */}
+                                        <div className="px-1 flex-1 flex flex-col">
+                                            {/* Trust Stars */}
+                                            <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 mb-2">
+                                                <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
+                                                <span className="text-gray-700">{rating}</span> 
+                                                <span>({reviews})</span>
+                                            </div>
+
+                                            <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                                                {product.name}
+                                            </h4>
+                                            <div className="mt-auto pt-3 flex items-center justify-between">
+                                                <span className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
+                                                    ৳{price.toFixed(0)}
+                                                </span>
+                                                <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-emerald-50 border border-transparent group-hover:border-emerald-200 transition-colors">
+                                                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 -rotate-45 group-hover:rotate-0 transition-all duration-300" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
+                </AnimatePresence>
+            )}
+
+            {!loading && products.length === 0 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-16 text-center rounded-[3rem] border border-gray-100 mt-8 shadow-sm">
+                    <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-100">
+                        <Zap className="w-10 h-10 text-emerald-500" />
+                    </div>
+                    <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Nothing Found</h3>
+                    <p className="text-gray-500 font-medium mb-6">We couldn't find any products matching your criteria.</p>
+                    <Link to={`/${storeSlug}`} className="inline-flex px-6 py-3 rounded-full bg-gray-900 text-white font-bold hover:bg-emerald-600 transition shadow-lg">
+                        Clear all filters
+                    </Link>
+                </motion.div>
+            )}
         </div>
     );
 };

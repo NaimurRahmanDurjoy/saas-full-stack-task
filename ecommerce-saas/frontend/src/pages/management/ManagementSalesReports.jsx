@@ -54,7 +54,7 @@ export default function ManagementSalesReports() {
                             </div>
                         </div>
                         <div className="mt-auto">
-                            <span className="text-5xl font-black text-gray-900 tracking-tighter">${parseFloat(report.total_sales).toFixed(2)}</span>
+                            <span className="text-5xl font-black text-gray-900 tracking-tighter">৳{parseFloat(report.total_sales).toFixed(2)}</span>
                             <div className="mt-2 text-sm font-medium text-brand-600 bg-brand-50 inline-block px-3 py-1 rounded-lg">Gross Volume</div>
                         </div>
                     </motion.div>
@@ -86,7 +86,7 @@ export default function ManagementSalesReports() {
                             </div>
                         </div>
                         <div className="mt-auto">
-                            <span className="text-5xl font-black text-gray-900 tracking-tighter">${avgOrder}</span>
+                            <span className="text-5xl font-black text-gray-900 tracking-tighter">৳{avgOrder}</span>
                             <div className="mt-2 text-sm font-medium text-orange-600 bg-orange-50 inline-block px-3 py-1 rounded-lg">Per Transaction</div>
                         </div>
                     </motion.div>

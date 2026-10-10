@@ -27,7 +27,7 @@ const Checkout = () => {
         setLoading(true);
         setError(null);
 
-        const checkoutToast = toast.loading('Processing your secure order...', { className: 'font-medium' });
+        const checkoutToast = toast.loading('Processing your secure order...', { className: 'font-medium bg-white text-gray-900 border border-gray-200' });
 
         try {
             const items = cart.map(item => ({
@@ -58,14 +58,14 @@ const Checkout = () => {
 
     if (cart.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 font-sans flex items-center justify-center p-6">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-sm max-w-lg w-full">
-                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="min-h-screen bg-[#fafafa] font-sans flex items-center justify-center p-6">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl border border-gray-100 p-12 text-center shadow-lg max-w-lg w-full">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full border border-gray-100 flex items-center justify-center mx-auto mb-6">
                         <Package className="w-8 h-8 text-gray-300" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Cart is empty</h2>
                     <p className="text-gray-500 mb-8 max-w-sm mx-auto">You have no items to checkout. Proceed back to the store to add items.</p>
-                    <Link to={`/${storeSlug}`} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-brand-600 text-white font-bold hover:bg-brand-700 transition">
+                    <Link to={`/${storeSlug}`} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-gray-900 text-white font-bold hover:bg-emerald-600 transition shadow-lg">
                         Return to Store
                     </Link>
                 </motion.div>
@@ -74,18 +74,7 @@ const Checkout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-brand-500 selection:text-white pb-24">
-            {/* Header */}
-            <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
-                <div className="px-6 py-4 mx-auto max-w-7xl flex items-center justify-between">
-                    <Link to={`/${storeSlug}/cart`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Back to Cart
-                    </Link>
-                    <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-1.5 rounded-full text-sm">
-                        <Lock className="w-4 h-4" /> Secure Checkout
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen bg-[#fafafa] font-sans selection:bg-emerald-500 selection:text-white pb-24 text-gray-900">
 
             <main className="max-w-6xl mx-auto px-6 py-12">
                 {error && (
@@ -111,7 +100,7 @@ const Checkout = () => {
                                     <input
                                         required
                                         type="text"
-                                        className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                        className="w-full h-14 bg-white border border-gray-200 focus:border-emerald-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 shadow-sm"
                                         placeholder="Jane Doe"
                                         value={form.customer_name}
                                         onChange={e => setForm({ ...form, customer_name: e.target.value })}
@@ -122,7 +111,7 @@ const Checkout = () => {
                                     <input
                                         required
                                         type="email"
-                                        className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                        className="w-full h-14 bg-white border border-gray-200 focus:border-emerald-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 shadow-sm"
                                         placeholder="jane@example.com"
                                         value={form.customer_email}
                                         onChange={e => setForm({ ...form, customer_email: e.target.value })}
@@ -134,7 +123,7 @@ const Checkout = () => {
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Phone Number</label>
                                 <input
                                     type="tel"
-                                    className="w-full h-14 bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all shadow-sm"
+                                    className="w-full h-14 bg-white border border-gray-200 focus:border-emerald-500 rounded-2xl px-5 font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 shadow-sm"
                                     placeholder="+1 (555) 000-0000"
                                     value={form.customer_phone}
                                     onChange={e => setForm({ ...form, customer_phone: e.target.value })}
@@ -145,7 +134,7 @@ const Checkout = () => {
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Shipping Address *</label>
                                 <textarea
                                     required
-                                    className="w-full bg-gray-50 focus:bg-white border-2 border-transparent focus:border-brand-500 rounded-2xl p-5 font-semibold text-gray-900 outline-none transition-all shadow-sm resize-none"
+                                    className="w-full bg-white border border-gray-200 focus:border-emerald-500 rounded-2xl p-5 font-semibold text-gray-900 outline-none transition-all resize-none placeholder-gray-400 shadow-sm"
                                     placeholder="123 Example St, City, State 12345, Country"
                                     value={form.shipping_address}
                                     onChange={e => setForm({ ...form, shipping_address: e.target.value })}
@@ -157,13 +146,13 @@ const Checkout = () => {
 
                     {/* Order Summary */}
                     <motion.aside initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="lg:w-[420px] shrink-0">
-                        <div className="bg-gray-50/50 rounded-[2rem] border border-gray-100 p-8 sticky top-28 shadow-sm">
+                        <div className="bg-gray-50/80 rounded-[2rem] border border-gray-200 p-8 sticky top-28 shadow-xl shadow-gray-200/30">
                             <h3 className="font-extrabold text-lg text-gray-900 mb-6">Order Summary</h3>
 
                             <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                                 {cart.map(item => (
                                     <div key={item.variant.id} className="flex gap-4 items-center bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
-                                        <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-50 p-1">
+                                        <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1">
                                             {item.variant.image_url ? (
                                                 <img src={item.variant.image_url} alt="Variant" className="w-full h-full object-contain mix-blend-multiply" />
                                             ) : (
@@ -175,7 +164,7 @@ const Checkout = () => {
                                             <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity}</p>
                                         </div>
                                         <div className="font-extrabold text-sm text-gray-900">
-                                            ${(item.variant.price * item.quantity).toFixed(2)}
+                                            ৳{(item.variant.price * item.quantity).toFixed(2)}
                                         </div>
                                     </div>
                                 ))}
@@ -184,26 +173,26 @@ const Checkout = () => {
                             <div className="space-y-3 mb-8">
                                 <div className="flex justify-between items-center text-gray-500 font-medium text-sm">
                                     <span>Subtotal</span>
-                                    <span>${cartTotal.toFixed(2)}</span>
+                                    <span className="text-gray-900">৳{cartTotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-gray-500 font-medium text-sm">
                                     <span>Shipping</span>
-                                    <span className="text-green-600 font-bold bg-green-50 px-2 rounded">FREE</span>
+                                    <span className="text-emerald-700 font-bold bg-emerald-50 px-2 border border-emerald-100 rounded">FREE</span>
                                 </div>
                             </div>
 
-                            <div className="h-px bg-gray-200/60 w-full mb-6" />
+                            <div className="h-px bg-gray-200 w-full mb-6" />
 
                             <div className="flex justify-between items-end mb-8">
                                 <span className="font-extrabold text-gray-900 text-lg">Total Due</span>
-                                <span className="font-black text-3xl text-gray-900 tracking-tight">${cartTotal.toFixed(2)}</span>
+                                <span className="font-black text-3xl text-gray-900 tracking-tight">৳{cartTotal.toFixed(2)}</span>
                             </div>
 
                             <button
                                 form="checkoutForm"
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full flex items-center justify-center gap-2 h-14 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-[0.98] ${loading ? 'bg-gray-200 text-gray-400 cursor-wait' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-brand-500/25 cursor-pointer'
+                                className={`w-full flex items-center justify-center gap-2 h-14 rounded-2xl font-bold text-lg transition-all shadow-lg active:scale-[0.98] ${loading ? 'bg-gray-200 text-gray-500 cursor-wait border border-gray-200' : 'bg-gray-900 text-white hover:bg-emerald-600 shadow-gray-300 cursor-pointer'
                                     }`}
                             >
                                 {loading ? (
@@ -216,8 +205,8 @@ const Checkout = () => {
                             </button>
 
                             <div className="mt-6 flex flex-col gap-3">
-                                <div className="flex items-center gap-2 justify-center text-xs font-semibold text-gray-500">
-                                    <Lock className="w-3.5 h-3.5 text-gray-400" />
+                                <div className="flex items-center justify-center gap-2 text-xs font-semibold text-gray-400">
+                                    <Lock className="w-3.5 h-3.5 text-gray-300" />
                                     256-bit encrypted secure transaction
                                 </div>
                             </div>

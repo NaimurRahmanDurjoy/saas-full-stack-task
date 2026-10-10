@@ -35,6 +35,10 @@ class ManagementPaymentVerificationController extends Controller
             // Generate end date natively cleanly dynamically inherently intelligently structurally seamlessly logically reliably naturally properly successfully
             if ($subscription->package->billing_period === 'yearly') {
                 $subscription->ends_at = now()->addYear();
+            } elseif ($subscription->package->billing_period === 'half_yearly') {
+                $subscription->ends_at = now()->addMonths(6);
+            } elseif ($subscription->package->billing_period === 'quarterly') {
+                $subscription->ends_at = now()->addMonths(3);
             } else {
                 $subscription->ends_at = now()->addMonth();
             }
