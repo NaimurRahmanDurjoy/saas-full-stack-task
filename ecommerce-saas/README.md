@@ -187,8 +187,8 @@ php artisan migrate:fresh --seed
 ---
 
 ### Default Credentials (from Database Seeder)
-- **Platform Admin:** `admin@example.com` / `password`
-- **Merchant:** `merchant@example.com` / `password`
+- **Platform Admin:** `admin@cartessa.com` / `password`
+- **Merchant:** `naim@gmail.com` / `password`
 
 ---
 
@@ -204,12 +204,12 @@ Here are the specific URLs and routes to access different parts of the applicati
 | **Merchant Dashboard** | `http://localhost:5175/admin` | Core tenant area (Products, Categories, Orders). |
 | **Platform Admin Login** | `http://localhost:5175/management/login` | Login page for the super admin of the SaaS. |
 | **Platform Admin Dashboard**| `http://localhost:5175/management` | Where the super admin monitors all stores/merchants. |
-| **Customer Storefront** | `http://localhost:5175/:storeSlug` | The public e-commerce store (e.g. `/awesome-store`). |
+| **Customer Storefront** | `http://localhost:5175/:storeSlug` | The public e-commerce store (e.g. `/naim-gadgets`, `/rakib-fashion`). |
 
 ---
 
 ## 🧪 Testing the Storefront
 Once running, you can access the seeded storefront by navigating to:  
-`http://localhost:5175/awesome-store` (or whatever slug the seeder generates).
+`http://localhost:5175/naim-gadgets` (or whatever slug the seeder generates).
 
 Enjoy the platform!
