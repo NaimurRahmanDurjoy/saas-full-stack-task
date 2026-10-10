@@ -1,7 +1,7 @@
 # Junior SaaS Full-Stack Engineer Task Submission
 
 **Candidate:** Md. Naimur Rahman  
-**Position:** Junior SaaS Full-Stack Engineer  
+**Position:** SaaS Full-Stack Engineer  
 
 Welcome to my submission repository for the Junior SaaS Full-Stack Engineer assessment. This repository contains all the required tasks, including the final integrated multi-tenant E-Commerce SaaS platform.
 
